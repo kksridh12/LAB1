@@ -1,11 +1,12 @@
 
 
-`timescale 1ns/1ps
+timeunit 1ns;
+timeprecision 1ps;
 
 module fifo_tb;
 
 	localparam int DSIZE = 8;
-	localparam int ASIZE = 2;
+	localparam int ASIZE = 4;
 	localparam int DEPTH = 1 << ASIZE;
 
 	logic [DSIZE-1:0] wdata;
@@ -125,5 +126,10 @@ module fifo_tb;
 			$display("FIFO full/empty test FAILED with %0d errors", errors);
 		$finish;
 	end
+	
 
+    initial begin
+        $fsdbDumpfile("novas.fsdb");
+        $fsdbDumpvars(0, dut, "+mda");
+    end
 endmodule
