@@ -15,7 +15,7 @@ set my_toplevel   fifo
 
 #/* The name of the clock pin. If no clock-pin     */
 #/* exists, pick anything                          */
-set my_clock_pin clk
+set my_clock_pin *clk
 
 #/* Target frequency in MHz for optimization       */
 set my_clk_freq_MHz 1000

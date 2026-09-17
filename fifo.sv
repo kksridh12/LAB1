@@ -33,7 +33,9 @@ module fifo  #(parameter DSIZE = 8,
  (
     output logic [DSIZE-1:0]    rdata,
     output logic                wfull,
+    output logic                almost_wfull,
     output logic                rempty,
+    output logic                almost_rempty,
     input  logic [DSIZE-1:0]    wdata,
     input  logic                winc,
     input  logic                wclk,
@@ -43,7 +45,7 @@ module fifo  #(parameter DSIZE = 8,
     input  logic                rrst_n);
     
     logic [ASIZE-1:0] waddr, raddr;
-    logic [ASIZE:0]   wptr, rptr, wq2_rptr, rq2_wptr;
+    logic [ASIZE:0]   wptr, rptr, wq2_rptr, rq2_wptr, wptr_ae, rptr_ae, wq2_rptr_ae, rq2_wptr_ae;
     
     //sync_r2w sync_r2w (.wq2_rptr(wq2_rptr), .rptr(rptr),
     //.wclk(wclk), .wrst_n(wrst_n));

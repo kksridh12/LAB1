@@ -19,6 +19,8 @@ module fifo_tb;
 	logic             rrst_n;
 	logic             wfull;
 	logic             rempty;
+	logic             almost_wfull;
+	logic             almost_rempty;
 	int               errors;
 
 	fifo #(
@@ -28,6 +30,8 @@ module fifo_tb;
 		.rdata (rdata),
 		.wfull (wfull),
 		.rempty(rempty),
+		.almost_wfull(almost_wfull),
+		.almost_rempty(almost_rempty),
 		.wdata (wdata),
 		.winc  (winc),
 		.wclk  (wclk),
