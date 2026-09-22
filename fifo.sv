@@ -1,9 +1,13 @@
 
+
 interface mem_itf #(
     parameter DSIZE = 8,
     parameter ASIZE = 4
 )
 (); 
+    // Shared memory signals. Write-side controls and addresses
+    // are driven by the FIFO's write-pointer logic; read data is returned
+    // from the memory using the read address.
     logic [DSIZE-1:0]    rdata;
     logic [ASIZE-1:0]    waddr;
     logic [ASIZE-1:0]    raddr;
@@ -13,6 +17,8 @@ interface mem_itf #(
     logic                wclk;
     logic                wrst_n;
 
+    // Memory write view: the memory receives write data, address, enable,
+    // and clock, and returns the full status used to block writes.
     modport mem_witf (
         output            wfull,
         input             wdata,
@@ -21,6 +27,8 @@ interface mem_itf #(
         input             wclk
     );
 
+    // Memory read view: the memory receives the read address and returns
+    // the corresponding data word.
     modport mem_ritf (
         output            rdata,
         input             raddr
@@ -46,14 +54,14 @@ module fifo  #(parameter DSIZE = 8,
     
     logic [ASIZE-1:0] waddr, raddr;
     logic [ASIZE:0]   wptr, rptr, wq2_rptr, rq2_wptr;
-    
-    //sync_r2w sync_r2w (.wq2_rptr(wq2_rptr), .rptr(rptr),
-    //.wclk(wclk), .wrst_n(wrst_n));
+
+    // Cross each Gray-coded pointer through a two-stage synchronizer into
+    // the opposite clock domain before using it for flag generation.
     sync_r2w #(ASIZE) u_sync_r2w (.*);
     sync_w2r #(ASIZE) u_sync_w2r (.*);
-    //sync_w2r sync_w2r (.rq2_wptr(rq2_wptr), .wptr(wptr),
-    //.rclk(rclk), .rrst_n(rrst_n));
-   
+
+    // The interface keeps the dual-port memory connections grouped by
+    // read and write domain while the FIFO exposes the public signals.
     mem_itf #(DSIZE, ASIZE) mem_if ();
 
     assign mem_if.wdata = wdata;
@@ -62,30 +70,19 @@ module fifo  #(parameter DSIZE = 8,
     assign wfull        = mem_if.wfull;
     assign rdata        = mem_if.rdata;
 
+    // The memory writes in the write clock domain and reads asynchronously
+    // through the registered read address supplied by rptr_empty.
     fifomem #(DSIZE, ASIZE) u_fifomem (.mem_witf(mem_if.mem_witf), .mem_ritf(mem_if.mem_ritf));
-    //fifomem #(DSIZE, ASIZE) fifomem
-    //(.rdata(rdata), .wdata(wdata),
-    //.waddr(waddr), .raddr(raddr),
-    //.wclken(winc), .wfull(wfull),
-    //.wclk(wclk));
-    
+
+    // Read-pointer logic owns the read address and read-domain flags.
     rptr_empty #(ASIZE) u_rptr_empty (.raddr (mem_if.raddr), .*);
-    //rptr_empty #(ASIZE) rptr_empty
-    //(.rempty(rempty),
-    //.raddr(raddr),
-    //.rptr(rptr), .rq2_wptr(rq2_wptr),
-    //.rinc(rinc), .rclk(rclk),
-    //.rrst_n(rrst_n));
-    
+
+    // Write-pointer logic owns the write address and write-domain flags.
     wptr_full #(ASIZE) u_wptr_full ( 
         .waddr (mem_if.waddr),
         .wfull (mem_if.wfull),
         .winc (mem_if.winc), 
         .wclk (mem_if.wclk),
         .*);
-    //wptr_full #(ASIZE) wptr_full
-    //(.wfull(wfull), .waddr(waddr),
-    //.wptr(wptr), .wq2_rptr(wq2_rptr),
-    //.winc(winc), .wclk(wclk),
-    //.wrst_n(wrst_n));
+
 endmodule
