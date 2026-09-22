@@ -134,6 +134,6 @@ module fifo_tb;
 
     initial begin
         $fsdbDumpfile("novas.fsdb");
-        $fsdbDumpvars(0, dut, "+mda");
+        $fsdbDumpvars(0, "+mda");
     end
 endmodule

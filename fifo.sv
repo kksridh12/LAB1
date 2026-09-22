@@ -45,7 +45,7 @@ module fifo  #(parameter DSIZE = 8,
     input  logic                rrst_n);
     
     logic [ASIZE-1:0] waddr, raddr;
-    logic [ASIZE:0]   wptr, rptr, wq2_rptr, rq2_wptr, wptr_ae, rptr_af, wq2_rptr_af, rq2_wptr_ae;
+    logic [ASIZE:0]   wptr, rptr, wq2_rptr, rq2_wptr;
     
     //sync_r2w sync_r2w (.wq2_rptr(wq2_rptr), .rptr(rptr),
     //.wclk(wclk), .wrst_n(wrst_n));
