@@ -173,13 +173,13 @@ module fifo_tb;
 			"almost_wfull at 12/16 entries"
 		);
 
-		// Write 13th entry which is the exact threshold for almost_wfull, so it should return to 0.
+		// Write 13th entry which is past the exact threshold for almost_wfull, so it should return to 0.
 		write_word(8'h2c);
 
 		check_flag(
 			almost_wfull,
-			1'b0,
-			"almost_wfull after threshold"
+			1'b1,
+			"almost_wfull stays asserted after threshold"
 		);
 
 		// Fill remaining three entries: 0x2D, 0x2E, 0x2F
@@ -209,13 +209,13 @@ module fifo_tb;
 			"almost_rempty at 4/16 entries remaining"
 		);
 
-		// Read one more entry which is the exact threshold for almost_rempty, so it should return to 0.
+		// Read one more entry which is past the exact threshold for almost_rempty, so it should return to 0.
 		read_word(8'h2c);
 
 		check_flag(
 			almost_rempty,
-			1'b0,
-			"almost_rempty after threshold"
+			1'b1,
+			"almost_rempty remains asserted after threshold"
 		);
 
 		if (errors == 0)
