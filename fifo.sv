@@ -37,7 +37,8 @@ interface mem_itf #(
 endinterface
 
 module fifo  #(parameter DSIZE = 8,
-               parameter ASIZE = 4)
+               parameter ASIZE = 4,
+               parameter ASYNC = 1)
  (
     output logic [DSIZE-1:0]    rdata,
     output logic                wfull,
@@ -57,8 +58,8 @@ module fifo  #(parameter DSIZE = 8,
 
     // Cross each Gray-coded pointer through a two-stage synchronizer into
     // the opposite clock domain before using it for flag generation.
-    sync_r2w #(ASIZE) u_sync_r2w (.*);
-    sync_w2r #(ASIZE) u_sync_w2r (.*);
+    sync_r2w #(ASIZE, ASYNC) u_sync_r2w (.*);
+    sync_w2r #(ASIZE, ASYNC) u_sync_w2r (.*);
 
     // The interface keeps the dual-port memory connections grouped by
     // read and write domain while the FIFO exposes the public signals.
