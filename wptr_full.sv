@@ -18,9 +18,8 @@ module wptr_full #(parameter ADDRSIZE = 4)
     input  logic                wrst_n);
     
     logic [ADDRSIZE:0] wbin;
-    logic [ADDRSIZE:0] wbin_af;
     logic [ADDRSIZE:0] rptr_bin;
-    logic [ADDRSIZE:0] wgraynext, wbinnext, wbin_af_next, wgray_af_next;
+    logic [ADDRSIZE:0] wgraynext, wbinnext;
     logic              wfull_val;
     logic              almost_wfull_val;
 
@@ -30,8 +29,8 @@ module wptr_full #(parameter ADDRSIZE = 4)
     
     // Register the binary and Gray write pointers in the write clock domain.
     always_ff @(posedge wclk or negedge wrst_n)
-       if (!wrst_n) {wbin, wptr, wbin_af} <= 0;
-       else         {wbin, wptr, wbin_af} <= {wbinnext, wgraynext, wbin_af_next};
+       if (!wrst_n) {wbin, wptr} <= 0;
+       else         {wbin, wptr} <= {wbinnext, wgraynext};
     
     // Generate the next write pointer and its Gray-code representation.
     // The binary pointer indexes memory; the Gray pointer crosses clock domains.
@@ -40,8 +39,6 @@ module wptr_full #(parameter ADDRSIZE = 4)
         waddr     = wbin[ADDRSIZE-1:0];
         wbinnext  = wbin + (winc & ~wfull);
         wgraynext = (wbinnext>>1) ^ wbinnext;
-        wbin_af_next = wbinnext + ALMOST;
-        wgray_af_next = (wbin_af_next>>1) ^ wbin_af_next; 
     end
     
     // Convert the synchronized read Gray pointer to binary for almost full computation.

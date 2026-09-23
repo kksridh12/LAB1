@@ -19,8 +19,7 @@ module rptr_empty #(parameter ADDRSIZE = 4)
     
     logic [ADDRSIZE:0] rbin;
     logic [ADDRSIZE:0] wptr_bin;
-    logic [ADDRSIZE:0] rbin_ae;
-    logic [ADDRSIZE:0] rgraynext, rbinnext, rbin_ae_next, rgray_ae_next;
+    logic [ADDRSIZE:0] rgraynext, rbinnext;
     logic rempty_val;
     logic almost_rempty_val;
     
@@ -30,17 +29,15 @@ module rptr_empty #(parameter ADDRSIZE = 4)
     // Register the binary and Gray read pointers in the read clock domain.
     //-------------------
     always_ff @(posedge rclk or negedge rrst_n)
-       if (!rrst_n) {rbin, rptr, rbin_ae} <= 0;
-       else         {rbin, rptr, rbin_ae} <= {rbinnext, rgraynext, rbin_ae_next};
+       if (!rrst_n) {rbin, rptr} <= 0;
+       else         {rbin, rptr} <= {rbinnext, rgraynext};
     
     // Generate the next read pointer and its Gray-code representation.
     // The binary pointer indexes memory; the Gray pointer crosses clock domains.
     always_comb begin
         raddr     = rbin[ADDRSIZE-1:0];
         rbinnext  = rbin + (rinc & ~rempty);
-        rbin_ae_next = rbinnext + ALMOST;
         rgraynext = (rbinnext>>1) ^ rbinnext;
-        rgray_ae_next = (rbin_ae_next>>1) ^ rbin_ae_next;
     end
     
     // Convert the synchronized write Gray pointer to binary for distance checks.
