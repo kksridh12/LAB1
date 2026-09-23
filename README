@@ -1,0 +1,15 @@
+SIM - 
+
+1. <change shell to csh>
+2. source env.cshrc
+3. cd sim
+4. make clean 
+5. make compile_and_sim
+6. make waves_verdi
+7. <restore_signal from the dropdown menu of the waveform viewer to load the signals>
+
+SYNTH - 
+
+1. cd synth
+2. make -B
+
