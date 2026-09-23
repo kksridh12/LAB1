@@ -234,7 +234,50 @@ module fifo_tb;
 	task automatic test_async_rw;
 		reset_fifo();
 
-		$display("TEST 3: Async simultaneous read/write not implemented yet");
+    check_flag(wfull, 1'b0, "wfull after reset");
+    check_flag(rempty, 1'b1, "rempty after reset");
+
+    // Preload four entries so the read side has data available before simultaneous reading and writing begins.
+    for (int index = 0; index < 4; index++) begin
+        write_word(DSIZE'(index + 8'h10));
+    end
+
+    // Allow the write pointer to synchronize into the read domain.
+    repeat (3) @(posedge rclk);
+
+    // Perform writes and reads at the same time.
+    // Writer adds 0x14 through 0x1F.
+    // Reader checks the complete sequence 0x10 through 0x1F.
+    fork
+
+        begin : writer
+            for (int index = 4; index < DEPTH; index++) begin
+                write_word(DSIZE'(index + 8'h10));
+            end
+        end
+
+        begin : reader
+            for (int index = 0; index < DEPTH; index++) begin
+                read_word(DSIZE'(index + 8'h10));
+            end
+        end
+
+    join
+
+    // Allow empty status to propagate through the read domain.
+    repeat (2) @(posedge rclk);
+    @(negedge rclk);
+
+    check_flag(rempty, 1'b1,
+               "rempty after simultaneous read/write test");
+
+    if (errors == 0)
+        $display("TEST 3: Async simultaneous read/write PASSED");
+    else
+        $display(
+            "TEST 3: Async simultaneous read/write FAILED with %0d errors",
+            errors
+        );
 	endtask
 
 
