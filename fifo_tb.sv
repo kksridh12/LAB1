@@ -155,7 +155,7 @@ module fifo_tb;
 
 		// Write 11 entries so almost_wfull should still be 0.
 		for (int index = 0; index < 11; index++) begin
-			write_word(DSIZE'(index + 8'h20));
+			write_word(DSIZE'(index + 8'h10));
 		end
 
 		check_flag(
@@ -165,7 +165,7 @@ module fifo_tb;
 		);
 
 		// Write 12th entry, so now its 3/4 full (12/16 entries).
-		write_word(8'h2b);
+		write_word(8'h1b);
 
 		check_flag(
 			almost_wfull,
@@ -174,7 +174,7 @@ module fifo_tb;
 		);
 
 		// Write 13th entry which is past the exact threshold for almost_wfull, so it should return to 0.
-		write_word(8'h2c);
+		write_word(8'h1c);
 
 		check_flag(
 			almost_wfull,
@@ -184,14 +184,14 @@ module fifo_tb;
 
 		// Fill remaining three entries: 0x2D, 0x2E, 0x2F
 		for (int index = 13; index < DEPTH; index++) begin
-			write_word(DSIZE'(index + 8'h20));
+			write_word(DSIZE'(index + 8'h10));
 		end
 
 		repeat (3) @(posedge rclk);
 
 		// Read 11 entries so almost_rempty should still be 0.
 		for (int index = 0; index < 11; index++) begin
-			read_word(DSIZE'(index + 8'h20));
+			read_word(DSIZE'(index + 8'h10));
 		end
 
 		check_flag(
@@ -201,7 +201,7 @@ module fifo_tb;
 		);
 
 		// Read 12th entry so now its 3/4 empty (4/16 entries remaining).
-		read_word(8'h2b);
+		read_word(8'h1b);
 
 		check_flag(
 			almost_rempty,
@@ -210,7 +210,7 @@ module fifo_tb;
 		);
 
 		// Read one more entry which is past the exact threshold for almost_rempty, so it should return to 0.
-		read_word(8'h2c);
+		read_word(8'h1c);
 
 		check_flag(
 			almost_rempty,
