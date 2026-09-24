@@ -4,9 +4,21 @@ SIM -
 2. source env.cshrc
 3. cd sim
 4. make clean 
-5. make compile_and_sim
-6. make waves_verdi
-7. <restore_signal from the dropdown menu of the waveform viewer to load the signals>
+5. make compile_verdi
+6. Run individual testcases:
+  Test 1: ./simv +TEST=full_empty
+  Test 2: ./simv +TEST=almost
+  Test 3: ./simv +TEST=async_rw
+7. Each testcase generates an FSDB file:
+  Test 1: test1_full_empty.fsdb
+  Test 2: test2_almost.fsdb
+  Test 3: test3_async_rw.fsdb
+8. Open a testcase waveform in Verdi:
+  verdi -dbdir ./simv.daidir -ssf test1_full_empty.fsdb -nologo
+  verdi -dbdir ./simv.daidir -ssf test2_almost.fsdb -nologo
+  verdi -dbdir ./simv.daidir -ssf test3_async_rw.fsdb -nologo
+9. In verdi, add/restore signals in the waveform viewer
+
 
 SYNTH - 
 
