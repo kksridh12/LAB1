@@ -1,0 +1,74 @@
+Magic 271485
+Revision Verdi_W-2024.09-SP2-3
+
+; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
+viewPort 0 11 1512 322 288 65
+
+; File list:
+; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
+openDirFile -d / "" "/home/a34137_asu/Documents/LAB1/sim_odd_even/novas.fsdb"
+
+; file time scale:
+; fileTimeScale ### s|ms|us|ns|ps
+
+individualSetFormt -File /home/a34137_asu/Documents/LAB1/sim_odd_even/novas.fsdb -UDEC /odd_even_tb/dut/u_even_fifo/u_fifomem/mem_witf/waddr[5:0]
+
+; signal spacing:
+signalSpacing 5
+
+; windowTimeUnit is used for zoom, cursor & marker
+; waveform viewport range
+zoom 733806.347746 1268606.284491
+cursor 455000.000000
+marker 0.000000
+
+; user define markers
+; userMarker time_pos marker_name color linestyle
+; visible top row signal index
+top 9
+; marker line index
+markerPos 15
+
+; event list
+; addEvent event_name event_expression
+; curEvent event_name
+
+
+
+COMPLEX_EVENT_BEGIN
+
+
+COMPLEX_EVENT_END
+
+
+
+; toolbar current search type
+; curSTATUS search_type
+curSTATUS ByChange
+
+
+addGroup "G1"
+activeDirFile "" "/home/a34137_asu/Documents/LAB1/sim_odd_even/novas.fsdb"
+addSignal -h 16 /odd_even_tb/clock
+addSignal -h 16 -holdScope reset
+addSignal -h 16 -UNSIGNED -HEX -holdScope data_in[7:0]
+addSignal -h 16 -holdScope write_en
+addSignal -h 16 /odd_even_tb/dut/odd_write_en
+addSignal -h 16 -holdScope even_write_en
+addSignal -h 16 -UNSIGNED -HEX -holdScope even_wdata[7:0]
+addSignal -h 16 -UNSIGNED -HEX -holdScope odd_wdata[7:0]
+addGroup "G2"
+addSignal -h 16 /odd_even_tb/dut/even_rempty
+addSignal -h 16 -holdScope odd_rempty
+addSignal -h 16 -holdScope odd_wfull
+addSignal -h 16 -holdScope even_wfull
+addSignal -h 16 -UNSIGNED -UDEC /odd_even_tb/dut/u_even_fifo/u_fifomem/mem_witf/waddr[5:0]
+addSignal -h 16 -UNSIGNED -HEX /odd_even_tb/dut/u_even_fifo/u_fifomem/mem_ritf/raddr[5:0]
+addSignal -h 16 -UNSIGNED /odd_even_tb/dut/state[1:0]
+addSignal -h 16 /odd_even_tb/read_en
+addSignal -h 16 -UNSIGNED -UDEC -holdScope data_out[7:0]
+addGroup "G3"
+
+; getSignalForm Scope Hierarchy Status
+; active file of getSignalForm
+

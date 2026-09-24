@@ -52,15 +52,12 @@ uniquify
 
 set my_period [expr 1000 / $my_clk_freq_MHz]
 
-set find_clock [ find port [list $my_clock_pin] ]
-if {  $find_clock != [list] } {
-   set clk_name $my_clock_pin
+foreach_in_collection clk [get_ports $my_clock_pin] {
+   set clk_name $clk
    create_clock -period $my_period $clk_name
-} else {
-   set clk_name vclk
-   create_clock -period $my_period -name $clk_name
 }
 
+set_clock_group -asynchronous -group rclk -group wclk 
 set_driving_cell  -lib_cell INVX1  [all_inputs]
 set_input_delay $my_input_delay_ns -clock $clk_name [remove_from_collection [all_inputs] $my_clock_pin]
 set_output_delay $my_output_delay_ns -clock $clk_name [all_outputs]
@@ -81,6 +78,7 @@ report_constraint -all_violators
 #set filename [format "%s%s"  $my_toplevel ".db"]
 #write -f db -hier -output $filename -xg_force_db
 
+redirect clocks.rep { report_clocks }
 redirect timing.rep { report_timing }
 redirect cell.rep { report_cell }
 redirect power.rep { report_power }
