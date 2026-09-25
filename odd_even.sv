@@ -40,9 +40,12 @@ module odd_even #(parameter DSIZE = 8,
    logic                 even_rempty;   
    logic [DSIZE-1:0]     even_rdata;
    logic [DSIZE-1:0]     even_wdata;
+   logic [DSIZE-1:0]  data_out_shdw;
 
    logic                 odd_first_preflop;
    logic                 even_first_preflop;
+   logic                 odd_read_en_preflop;
+   logic                 even_read_en_preflop;             
    logic                 odd_first;
    logic                 even_first;
 
@@ -89,13 +92,69 @@ module odd_even #(parameter DSIZE = 8,
        if (!reset)                    state <= IDLE;
        else if (state != next_state)  state <= next_state;
 
+   /*always_comb begin
+      case (state)
+         IDLE: begin 
+                 next_state = IDLE;
+                 if (even_rempty && odd_rempty) begin
+                    if (read_en & even_first) next_state = EVEN;
+                    else if (read_en & odd_first) next_state = ODD;
+                 end
+               end
+         EVEN: next_state = (read_en & !odd_rempty) ? ODD : EVEN;
+         ODD:  next_state = (read_en & !even_rempty) ? EVEN : ODD;
+         SPARE: next_state = IDLE;
+         default: next_state = IDLE; 
+      endcase
+   end
+
+   always_comb begin
+      case (next_state)
+         IDLE:  even_first_preflop = even_write_en & (even_rempty && odd_rempty) ? 1'b1 : read_en ? 1'b0 : even_first;
+         EVEN:  even_first_preflop = 1'b0;
+         ODD:   even_first_preflop = 1'b0;
+         SPARE: even_first_preflop = 1'b0;
+         default: even_first_preflop = 1'b0;
+      endcase
+   end
+
+   always_comb begin
+      case (next_state)
+         IDLE:  even_read_en_preflop = 1'b0;
+         EVEN:  even_read_en_preflop = even_first & read_en ? 1'b1 : 1'b0;
+         ODD:   even_read_en_preflop = (read_en & !even_rempty) ? 1'b1 : 1'b0;
+         SPARE: even_read_en_preflop = 1'b0;
+         default: even_read_en_preflop = 1'b0;
+      endcase
+   end
+
+   always_comb begin
+      case (next_state)
+         IDLE:  odd_first_preflop = odd_write_en & (even_rempty && odd_rempty) ? 1'b1 : read_en ? 1'b0 : odd_first;
+         EVEN:  odd_first_preflop = 1'b0;
+         ODD:   odd_first_preflop = 1'b0;
+         SPARE: odd_first_preflop = 1'b0;
+         default: odd_first_preflop = 1'b0;
+      endcase
+   end
+
+   always_comb begin
+      case (next_state)
+         IDLE:  odd_read_en_preflop = 1'b0;
+         EVEN:  odd_read_en_preflop = (read_en & !odd_rempty) ? 1'b1 : 1'b0;
+         ODD:   odd_read_en_preflop = odd_first & read_en ? 1'b1 : 1'b0;
+         SPARE: odd_read_en_preflop = 1'b0;
+         default: odd_read_en_preflop = 1'b0;
+      endcase
+   end*/
+   
    always_comb begin
        // Default all read enables to inactive unless the state machine
        // explicitly chooses a FIFO to advance.
-       even_read_en = 1'b0;
+       even_read_en_preflop = 1'b0;
        even_first_preflop = even_first;
        odd_first_preflop  = odd_first;
-       odd_read_en = 1'b0;
+       odd_read_en_preflop = 1'b0;
        case (state) 
           IDLE:  begin 
                    next_state = IDLE;
@@ -105,8 +164,8 @@ module odd_even #(parameter DSIZE = 8,
                      else if (odd_write_en) odd_first_preflop  = 1'b1;
                    end 
                    // if read_en is available, choose the FIFO which was written to first and transition the SM to the other fifo.
-                   else if (read_en & even_first) begin even_first_preflop = 1'b0; even_read_en = 1'b1; next_state = ODD; end
-                   else if (read_en & odd_first)  begin even_first_preflop = 1'b0; odd_read_en  = 1'b1; next_state = EVEN; end
+                   else if (read_en & even_first) begin even_first_preflop = 1'b0; even_read_en_preflop = 1'b1; next_state = ODD; end
+                   else if (read_en & odd_first)  begin even_first_preflop = 1'b0; odd_read_en_preflop  = 1'b1; next_state = EVEN; end
                  end
            EVEN: begin
                   // if FIFO is not empty and read_en is available , read out data from EVEN FIFO and transition SM to ODD.
@@ -119,6 +178,15 @@ module odd_even #(parameter DSIZE = 8,
                   end else begin
                         next_state = EVEN;
                      end
+                  odd_read_en_preflop = 1'b0;
+                  if (read_en & !even_rempty) begin
+                     if (!even_read_en) even_read_en_preflop = 1'b1; 
+                     else               even_read_en_preflop = 1'b0;
+                     if (!odd_rempty)   next_state = ODD;
+                     else               next_state = EVEN;
+                  end else begin
+                     even_read_en_preflop = 1'b0; next_state = EVEN;
+                  end
                  end
            ODD:  begin
                   // if FIFO is not empty and read_en is available , read out data from ODD FIFO and transition SM to EVEN.
@@ -135,18 +203,30 @@ module odd_even #(parameter DSIZE = 8,
            SPARE  : begin {even_first_preflop, even_read_en, odd_first_preflop, odd_read_en} = 4'b0000; next_state = IDLE; end
            default: begin {even_first_preflop, even_read_en, odd_first_preflop, odd_read_en} = 4'b0000; next_state = IDLE; end
 
+                  even_read_en_preflop = 1'b0;
+                  if (read_en & !odd_rempty) begin
+                     if (!odd_read_en) odd_read_en_preflop = 1'b1; 
+                     else              odd_read_en_preflop = 1'b0;
+                     if (!even_rempty) next_state = EVEN;
+                     else              next_state = ODD;
+                  end else begin
+                     odd_read_en_preflop = 1'b0; next_state = ODD;
+                  end
+                 end
+           SPARE  : begin {even_first_preflop, even_read_en_preflop, odd_first_preflop, odd_read_en_preflop} = 4'b0000; next_state = IDLE; end
+           default: begin {even_first_preflop, even_read_en_preflop, odd_first_preflop, odd_read_en_preflop} = 4'b0000; next_state = IDLE; end
        endcase
    end
 
    // Save status flag for identifying which FIFO was written to so that it is the first FIFO read out of 
    // when read_en is available.
    always_ff @( posedge clock or negedge reset )
-      if (!reset)   {odd_first,even_first} <= 2'b0;
-      else          {odd_first,even_first} <= {odd_first_preflop,even_first_preflop};
+      if (!reset)   {even_read_en,odd_read_en,odd_first,even_first} <= 4'b0;
+      else          {even_read_en,odd_read_en,odd_first,even_first} <= {even_read_en_preflop,odd_read_en_preflop,odd_first_preflop,even_first_preflop};
       
    // Shadow register used to hold the last valid output value when no
    // FIFO is being read in the current cycle.
-   logic [DSIZE-1:0]  data_out_shdw;
+
    always_ff @(posedge clock or negedge reset) 
       if (!reset)            data_out_shdw <= '0;
       else if (even_read_en) data_out_shdw <= even_rdata;
