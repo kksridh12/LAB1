@@ -112,36 +112,29 @@ module odd_even #(parameter DSIZE = 8,
                   // if FIFO is not empty and read_en is available , read out data from EVEN FIFO and transition SM to ODD.
                   // Otherwise, stay in EVEN if the ODD FIFO is empty but dont read from the EVEN FIFO. 
                   odd_read_en = 1'b0;
-		  even_read_en = 1'b0;
+		            even_read_en = 1'b0;
                   if (read_en & !even_rempty) begin
-			even_read_en = 1'b1;
-                     if (!odd_rempty) begin
-                        next_state = ODD;
-                     end else begin
+			            even_read_en = 1'b1;
+                     next_state = ODD;
+                  end else begin
                         next_state = EVEN;
                      end
-                  end else begin
-                     even_read_en = 1'b0; next_state = EVEN;
-                  end
                  end
            ODD:  begin
                   // if FIFO is not empty and read_en is available , read out data from ODD FIFO and transition SM to EVEN.
                   // Otherwise, stay in ODD if the EVEN FIFO is empty but dont read from the ODD FIFO. 
                   even_read_en = 1'b0;
-		  odd_read_en = 1'b0;
+		            odd_read_en = 1'b0;
                   if (read_en & !odd_rempty) begin
-			odd_read_en = 1'b1;
-                     if (!even_rempty) begin
-                        next_state = EVEN;
-                     end else begin
-                        next_state = ODD;
-                     end
+			         odd_read_en = 1'b1;
+                  next_state = EVEN;
                   end else begin
-                     odd_read_en = 1'b0; next_state = ODD;
+                        next_state = ODD;
                   end
                  end
            SPARE  : begin {even_first_preflop, even_read_en, odd_first_preflop, odd_read_en} = 4'b0000; next_state = IDLE; end
            default: begin {even_first_preflop, even_read_en, odd_first_preflop, odd_read_en} = 4'b0000; next_state = IDLE; end
+
        endcase
    end
 
