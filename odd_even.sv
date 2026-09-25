@@ -113,12 +113,11 @@ module odd_even #(parameter DSIZE = 8,
                   // Otherwise, stay in EVEN if the ODD FIFO is empty but dont read from the EVEN FIFO. 
                   odd_read_en = 1'b0;
 		  even_read_en = 1'b0;
+		  next_state = EVEN;
                   if (read_en & !even_rempty) begin
 			even_read_en = 1'b1;
                      if (!odd_rempty) begin
                         next_state = ODD;
-                     end else begin
-                        next_state = EVEN;
                      end
                   end else begin
                      even_read_en = 1'b0; next_state = EVEN;
@@ -129,13 +128,12 @@ module odd_even #(parameter DSIZE = 8,
                   // Otherwise, stay in ODD if the EVEN FIFO is empty but dont read from the ODD FIFO. 
                   even_read_en = 1'b0;
 		  odd_read_en = 1'b0;
+		  next_state = ODD;
                   if (read_en & !odd_rempty) begin
 			odd_read_en = 1'b1;
                      if (!even_rempty) begin
                         next_state = EVEN;
-                     end else begin
-                        next_state = ODD;
-                     end
+                     end 
                   end else begin
                      odd_read_en = 1'b0; next_state = ODD;
                   end
