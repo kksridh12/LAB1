@@ -144,7 +144,6 @@ module odd_even_tb;
 							read_en = 1'b1;
 						else
 							read_en = 1'b0;
-						@(posedge clock);
 						#1;
 						// A valid alternating output occurs whenever
 						// the DUT actually reads one of its FIFOs.
@@ -152,6 +151,7 @@ module odd_even_tb;
 							check_output(expected[output_count]);
 							output_count++;
 						end
+                        @(posedge clock);
 					end
 				end
 
@@ -226,12 +226,12 @@ module odd_even_tb;
 							read_en = 1'b1;
 						else
 							read_en = 1'b0;
-						@(posedge clock);
 						#1;
 						if (dut.even_read_en || dut.odd_read_en) begin
 							check_output(expected[output_count]);
 							output_count++;
 						end
+                        @(posedge clock);
 					end
 				end
 
